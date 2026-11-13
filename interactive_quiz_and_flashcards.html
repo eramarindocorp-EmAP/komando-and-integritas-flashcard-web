@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integritas & Komando: Kuis & Flashcards Interaktif</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkblue: {
+                            900: '#070F1E',
+                            800: '#0D1B2A',
+                            700: '#1B2A47',
+                            600: '#273E63'
+                        },
+                        emerald: {
+                            500: '#10B981',
+                            600: '#059669',
+                            400: '#34D399',
+                            900: '#064E3B'
+                        },
+                        gold: {
+                            DEFAULT: '#D4AF37',
+                            light: '#F3E5AB',
+                            dark: '#AA8C2C',
+                            metallic: '#E5C158'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D1B2A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #273E63;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+    </style>
+</head>
+<body class="h-full bg-darkblue-900 text-slate-100 font-sans antialiased flex flex-col justify-between selection:bg-gold selection:text-darkblue-900">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-darkblue-800 border-b border-gold/20 shadow-lg px-4 py-4 sm:px-8">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center shadow-md shadow-gold/10">
+                    <i class="fa-solid fa-shield-halved text-darkblue-900 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-gold-light">KOMANDO & INTEGRITAS</h1>
+                    <p class="text-xs text-slate-400">Modul Pelatihan Tata Kelola & Disiplin Team</p>
+                </div>
+            </div>
+            <!-- Mode Switcher Buttons -->
+            <div class="flex bg-darkblue-900 p-1.5 rounded-xl border border-slate-700">
+                <button id="btnTabFlashcards" onclick="switchMode('flashcards')" class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md">
+                    <i class="fa-solid fa-clone"></i>
+                    <span>Flashcards</span>
+                </button>
+                <button id="btnTabQuiz" onclick="switchMode('quiz')" class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>Ujian Kuis</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 my-auto">
+        <div class="w-full max-w-4xl mx-auto">
+
+            <!-- FLASHCARDS VIEW -->
+            <div id="flashcardsView" class="space-y-6">
+                <!-- Progress Indicator -->
+                <div class="flex justify-between items-center text-sm px-2">
+                    <span class="text-slate-400 font-medium">Kartu <span id="fcCurrentIndex" class="text-gold font-bold">1</span> dari <span id="fcTotalCards">8</span></span>
+                    <span class="bg-darkblue-800 border border-gold/30 text-gold text-xs px-3 py-1 rounded-full uppercase tracking-wider font-semibold">Mode Belajar</span>
+                </div>
+
+                <!-- Flashcard Container with Flip Animation -->
+                <div class="perspective-1000 w-full h-80 sm:h-96 cursor-pointer" onclick="toggleFlip()">
+                    <div id="flashcardInner" class="relative w-full h-full duration-500 transform-style-3d shadow-2xl rounded-2xl">
+                        
+                        <!-- Front Face -->
+                        <div class="absolute inset-0 w-full h-full bg-darkblue-800 border-2 border-gold/40 rounded-2xl p-6 sm:p-10 flex flex-col justify-between backface-hidden shadow-xl hover:border-gold/70 transition-colors">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs uppercase tracking-widest text-emerald-400 font-semibold bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30" id="fcCategory">Prinsip Manajemen</span>
+                                <i class="fa-solid fa-rotate text-gold/60 animate-pulse text-sm"></i>
+                            </div>
+                            <div class="text-center my-auto px-2">
+                                <h2 class="text-xl sm:text-2xl font-bold text-slate-100 leading-snug" id="fcFrontText">Pertanyaan / Konsep</h2>
+                            </div>
+                            <div class="text-center text-xs text-slate-400 italic">
+                                Klik untuk melihat penjelasan & arahan mendalam
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-darkblue-800 to-darkblue-700 border-2 border-emerald-500/50 rounded-2xl p-6 sm:p-10 flex flex-col justify-between backface-hidden rotate-y-180 shadow-xl">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs uppercase tracking-widest text-gold font-semibold bg-gold/10 px-3 py-1 rounded-full border border-gold/30">Penjelasan & Kebijakan</span>
+                                <i class="fa-solid fa-check-circle text-emerald-400 text-sm"></i>
+                            </div>
+                            <div class="my-auto px-2 overflow-y-auto max-h-48">
+                                <p class="text-sm sm:text-base text-slate-200 leading-relaxed" id="fcBackText">Jawaban / Detail Konsep</p>
+                            </div>
+                            <div class="text-center text-xs text-slate-400 italic">
+                                Klik untuk kembali ke soal
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Flashcard Navigation Controls -->
+                <div class="flex justify-between items-center pt-2">
+                    <button onclick="prevFlashcard()" class="px-5 py-2.5 rounded-xl bg-darkblue-800 border border-slate-700 text-slate-300 hover:text-white hover:border-gold/50 transition-all font-medium flex items-center space-x-2 shadow-md">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span class="hidden sm:inline">Sebelumnya</span>
+                    </button>
+                    <button onclick="shuffleFlashcards()" class="px-4 py-2.5 rounded-xl bg-darkblue-800/80 border border-slate-700 text-gold hover:bg-darkblue-700 transition-all text-sm font-medium flex items-center space-x-2">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>Acak Kartu</span>
+                    </button>
+                    <button onclick="nextFlashcard()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white transition-all font-medium flex items-center space-x-2 shadow-lg shadow-emerald-900/30">
+                        <span class="hidden sm:inline">Berikutnya</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- QUIZ VIEW -->
+            <div id="quizView" class="hidden space-y-6">
+                <!-- Quiz Header Progress -->
+                <div class="bg-darkblue-800 border border-slate-700/80 p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Evaluasi Mandiri Team</span>
+                        <h2 class="text-lg font-bold text-slate-100">Ujian Pemahaman Komando & Integritas</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">Soal Ke</div>
+                            <div class="text-sm font-bold text-gold"><span id="quizCurrentNum">1</span> / <span id="quizTotalNum">6</span></div>
+                        </div>
+                        <div class="h-8 w-px bg-slate-700"></div>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">Skor Sementara</div>
+                            <div class="text-sm font-bold text-emerald-400" id="quizLiveScore">0 Poin</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card Question Area -->
+                <div id="quizQuestionCard" class="bg-darkblue-800 border-2 border-slate-700 p-6 sm:p-8 rounded-2xl shadow-xl space-y-6 transition-all">
+                    <div class="flex justify-between items-center">
+                        <span id="quizCategoryBadge" class="text-xs bg-gold/10 text-gold border border-gold/30 px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Kategori</span>
+                        <span id="quizScoreVal" class="text-xs text-slate-400 font-medium">Bobot: 20 Poin</span>
+                    </div>
+
+                    <h3 id="quizQuestionText" class="text-lg sm:text-xl font-semibold text-slate-100 leading-snug">
+                        Pertanyaan kuis akan dimuat di sini...
+                    </h3>
+
+                    <!-- Options Container -->
+                    <div id="quizOptionsContainer" class="space-y-3">
+                        <!-- Options generated dynamically -->
+                    </div>
+
+                    <!-- Explanation box (hidden until answered) -->
+                    <div id="quizExplanationBox" class="hidden mt-4 p-4 rounded-xl border transition-all text-sm space-y-1">
+                        <div class="font-bold flex items-center space-x-2" id="quizExpTitle">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Penjelasan Respon & Arahan:</span>
+                        </div>
+                        <p id="quizExpText" class="text-slate-300 text-xs sm:text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Quiz Navigation Controls -->
+                <div class="flex justify-between items-center pt-2">
+                    <button id="quizPrevBtn" onclick="prevQuizQuestion()" class="px-5 py-2.5 rounded-xl bg-darkblue-800 border border-slate-700 text-slate-300 hover:text-white transition-all font-medium flex items-center space-x-2 opacity-50 cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Sebelumnya</span>
+                    </button>
+                    <button id="quizNextBtn" onclick="nextQuizQuestion()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white transition-all font-medium flex items-center space-x-2 shadow-lg shadow-emerald-900/30 hidden">
+                        <span>Lanjut Soal</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- QUIZ RESULT VIEW (Hidden by default) -->
+            <div id="quizResultView" class="hidden bg-darkblue-800 border-2 border-gold/40 p-8 rounded-2xl shadow-2xl text-center space-y-6 max-w-2xl mx-auto">
+                <div class="w-20 h-20 bg-gradient-to-br from-gold to-gold-dark rounded-full flex items-center justify-center mx-auto shadow-xl shadow-gold/20">
+                    <i class="fa-solid fa-award text-darkblue-900 text-3xl"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gold-light">Evaluasi Selesai</h2>
+                    <p class="text-slate-300 text-sm">Berikut adalah hasil rekapitulasi pemahaman materi operasional & kedisiplinan Anda.</p>
+                </div>
+
+                <div class="bg-darkblue-900/80 border border-slate-700 p-6 rounded-xl flex justify-around items-center">
+                    <div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider">Total Skor</div>
+                        <div class="text-3xl font-extrabold text-emerald-400 mt-1" id="finalScoreText">0 / 100</div>
+                    </div>
+                    <div class="h-12 w-px bg-slate-700"></div>
+                    <div>
+                        <div class="text-xs text-slate-400 uppercase tracking-wider">Status Evaluasi</div>
+                        <div class="text-base font-bold text-gold mt-1" id="finalStatusText">Tersertifikasi</div>
+                    </div>
+                </div>
+
+                <div id="resultMessage" class="text-xs sm:text-sm text-slate-300 leading-relaxed px-4 py-3 bg-darkblue-700/50 rounded-lg border border-slate-700">
+                    Pesan evaluasi akan muncul di sini...
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="restartQuiz()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 text-white font-semibold shadow-lg transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Ulangi Kuis</span>
+                    </button>
+                    <button onclick="switchMode('flashcards')" class="px-6 py-3 rounded-xl bg-darkblue-900 border border-gold/40 text-gold hover:bg-darkblue-700 font-semibold transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-clone"></i>
+                        <span>Kembali ke Flashcards</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Information -->
+    <footer class="bg-darkblue-800/80 border-t border-slate-800 py-3 px-4 text-center text-xs text-slate-400">
+        <p><span class="text-gold font-semibold">COMMITMENT – EXCELLENT – TRUSTED</span> | <span class="text-emerald-400 font-semibold">SATU PINTU – SATU STANDAR – SATU KOMANDO</span></p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- DATA FLASHCARDS ---
+        const flashcardsData = [
+            {
+                category: "Prinsip Manajemen Operasional",
+                front: "Bagaimana cara menyikapi omongan, opini, atau isu dari pihak luar yang menilai pekerjaan team dari luar arena?",
+                back: "Jangan mudah terpengaruh. Pihak luar tidak berada di dalam arena tugas, tidak mengikuti seluruh proses, dan tidak tahu kedalaman persoalan serta tantangan yang dihadapi. Fokus pada mekanisme internal."
+            },
+            {
+                category: "Doktrin Komando",
+                front: "Apa makna utama dari doktrin: 'SATU PINTU – SATU STANDAR – SATU KOMANDO'?",
+                back: "Semua arahan, strategi, dan kebutuhan informasi harus mengalir secara terpusat. Setiap anggota wajib mengikuti satu standar kerja yang telah ditetapkan dan patuh pada instruksi komando pimpinan tanpa tindakan sepihak."
+            },
+            {
+                category: "Integritas Operasional",
+                front: "Mengapa mekanisme dukungan operasional (finansial/tata kelola) tidak boleh diputarbalikkan atau dijadikan bahan olok-olok?",
+                back: "Mekanisme tersebut bukan sekadar urusan uang, melainkan instrumen untuk melihat sikap, integritas, kedewasaan, komitmen, dan cara seseorang menempatkan tanggung jawab di atas kepentingan pribadi."
+            },
+            {
+                category: "Disiplin & Risiko",
+                front: "Apa risiko dari bertindak berdasarkan asumsi atau mengambil keputusan secara sepihak tanpa memahami situasi utuh?",
+                back: "Risikonya sangat fatal: 'Jangan tumpahkan piring nasi Anda sendiri karena kebodohan, kecerobohan, dan ketidakmampuan menjaga sikap serta mengendalikan diri.' Tindakan sembrono merugikan diri sendiri."
+            },
+            {
+                category: "Sikap Organisasi",
+                front: "Bagaimana sikap yang benar jika seorang anggota tidak menyukai pola kerja atau arah perjalanan team yang sedang dibangun?",
+                back: "Silakan mengambil keputusan secara dewasa untuk keluar dari Team tanpa memaksakan diri. Namun, dilarang keras bertahan sambil merusak kepercayaan, melemahkan semangat, atau menjadikan perjuangan team sebagai bahan candaan."
+            },
+            {
+                category: "Komitmen Berlayar Bersama",
+                front: "Apa pesan tersirat dari analogi: 'Jangan hanya ingin ikut berlayar ketika laut tenang, tetapi kemudian merusak kapal ketika perjalanan menghadapi tantangan'?",
+                back: "Anggota yang sejati adalah mereka yang tetap solid, menjaga kepercayaan, dan bertahan di saat badai maupun tantangan, bukan hanya hadir saat situasi mudah dan menguntungkan."
+            },
+            {
+                category: "Nilai Inti Organisasi",
+                front: "Sebutkan dan jelaskan esensi dari prinsip dasar: COMMITMENT – EXCELLENT – TRUSTED",
+                back: "Commitment (komitmen penuh pada proses), Excellent (standar kerja terbaik dan terukur), dan Trusted (menjaga kepercayaan penuh dalam satu kesatuan team yang solid)."
+            },
+            {
+                category: "Pengendalian Diri",
+                front: "Mengapa pengendalian diri dan tata krama komunikasi sangat ditekankan dalam situasi penuh dinamika saat ini?",
+                back: "Karena emosi sesaat atau kecerobohan kecil dapat merusak reputasi profesional individu serta menghancurkan energi kolektif yang sedang dibangun bersama."
+            }
+        ];
+
+        // --- DATA KUIS ---
+        const quizData = [
+            {
+                category: "Manajemen & Opini Luar",
+                question: "Bagaimana sikap yang paling tepat ketika menghadapi opini atau penilaian dari pihak luar yang tidak memahami proses kerja internal kita?",
+                options: [
+                    "Mengikuti asumsi mereka untuk menghindari perdebatan",
+                    "Mengabaikan opini tersebut karena mereka tidak berada di arena tugas dan tidak tahu kedalaman persoalan",
+                    "Meminta pihak luar tersebut ikut campur dalam pengambilan keputusan",
+                    "Membuat keputusan reaktif berdasarkan kritikan luar"
+                ],
+                correct: 1,
+                explanation: "Pihak luar tidak berada di arena tugas dan tidak mengetahui proses secara utuh. Fokus team harus tetap pada strategi dan arahan internal."
+            },
+            {
+                category: "Doktrin Komando",
+                question: "Manakah pernyataan yang paling mencerminkan esensi dari doktrin 'Satu Pintu – Satu Standar – Satu Komando'?",
+                options: [
+                    "Setiap anggota bebas menjalankan aturan sesuai interpretasi masing-masing",
+                    "Arahan mengalir terpusat dengan kepatuhan pada standar dan komando operasional yang jelas",
+                    "Keputusan diambil berdasarkan voting mayoritas di luar jalur pimpinan",
+                    "Standar kerja dapat diubah sewaktu-waktu sesuai kenyamanan personal"
+                ],
+                correct: 1,
+                explanation: "Doktrin ini menuntut keselarasan mutlak melalui satu jalur komando dan standar operasional yang seragam."
+            },
+            {
+                category: "Integritas & Etika",
+                question: "Apa fungsi utama dari mekanisme dukungan operasional (termasuk tata kelola finansial) di dalam team?",
+                options: [
+                    "Hanya sebagai formalitas administratif bulanan",
+                    "Sebagai bahan candaan di ruang publik",
+                    "Sebagai instrumen untuk menguji sikap, integritas, kedewasaan, dan komitmen tanggung jawab",
+                    "Sebagai alat untuk membebani anggota team secara sepihak"
+                ],
+                correct: 2,
+                explanation: "Mekanisme operasional menunjukkan bagaimana seseorang menempatkan tanggung jawab dan komitmen di atas kepentingan pribadi."
+            },
+            {
+                category: "Manajemen Anggota",
+                question: "Jika seorang anggota team sudah tidak sejalan atau tidak menyukai pola kerja yang dibangun, apa tindakan profesional yang disarankan?",
+                options: [
+                    "Bertahan di dalam team sambil menyebar isu negatif dan merusak kepercayaan",
+                    "Mengambil keputusan secara dewasa untuk keluar tanpa merusak proses perjuangan bersama",
+                    "Memaksa seluruh team mengubah aturan demi kepentingan pribadi",
+                    "Membiarkan pekerjaan terbengkalai tanpa koordinasi"
+                ],
+                correct: 1,
+                explanation: "Setiap orang berhak memiliki pandangan, namun jika tidak sejalan, silakan mengambil keputusan secara dewasa tanpa merusak kepercayaan."
+            },
+            {
+                category: "Filosofi Berlayar",
+                question: "Apa arti filosofis dari kalimat 'Jangan hanya ingin ikut berlayar ketika laut tenang, tetapi kemudian merusak kapal ketika perjalanan menghadapi tantangan'?",
+                options: [
+                    "Kita hanya bekerja saat cuaca bagus",
+                    "Tantangan adalah alasan untuk meninggalkan team",
+                    "Komitmen sejati diuji saat menghadapi kesulitan dan badai tantangan, bukan hanya saat situasi mudah",
+                    "Kapal harus diganti setiap kali ada ombak besar"
+                ],
+                correct: 2,
+                explanation: "Integritas dan kesetiaan pada team diuji saat menghadapi kesulitan dan tantangan operasional."
+            },
+            {
+                category: "Prinsip Inti",
+                question: "Tiga pilar utama yang menjadi prinsip pegangan dalam team kita adalah:",
+                options: [
+                    "Cepat – Murah – Mudah",
+                    "Commitment – Excellent – Trusted",
+                    "Ambisius – Fleksibel – Independen",
+                    "Senioritas – Kecepatan – Keuntungan"
+                ],
+                correct: 1,
+                explanation: "Prinsip utama yang dipegang adalah COMMITMENT – EXCELLENT – TRUSTED."
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentMode = 'flashcards';
+        
+        // Flashcard State
+        let fcIndex = 0;
+        let isFlipped = false;
+        let activeFlashcards = [...flashcardsData];
+
+        // Quiz State
+        let quizIndex = 0;
+        let quizScore = 0;
+        let userAnswers = {};
+        let quizCompleted = false;
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            renderFlashcard();
+        };
+
+        // --- MODE SWITCHING ---
+        function switchMode(mode) {
+            currentMode = mode;
+            const fcView = document.getElementById('flashcardsView');
+            const qView = document.getElementById('quizView');
+            const rView = document.getElementById('quizResultView');
+            const btnFc = document.getElementById('btnTabFlashcards');
+            const btnQ = document.getElementById('btnTabQuiz');
+
+            rView.classList.add('hidden');
+
+            if (mode === 'flashcards') {
+                fcView.classList.remove('hidden');
+                qView.classList.add('hidden');
+                
+                btnFc.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md";
+                btnQ.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 text-slate-400 hover:text-white";
+                renderFlashcard();
+            } else {
+                fcView.classList.add('hidden');
+                qView.classList.remove('hidden');
+                
+                btnQ.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md";
+                btnFc.className = "px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center space-x-2 text-slate-400 hover:text-white";
+                initQuiz();
+            }
+        }
+
+        // --- FLASHCARD LOGIC ---
+        function renderFlashcard() {
+            const card = activeFlashcards[fcIndex];
+            document.getElementById('fcCategory').innerText = card.category;
+            document.getElementById('fcFrontText').innerText = card.front;
+            document.getElementById('fcBackText').innerText = card.back;
+            document.getElementById('fcCurrentIndex').innerText = fcIndex + 1;
+            document.getElementById('fcTotalCards').innerText = activeFlashcards.length;
+
+            // Reset flip state if needed
+            if (isFlipped) {
+                toggleFlip();
+            }
+        }
+
+        function toggleFlip() {
+            const inner = document.getElementById('flashcardInner');
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                inner.style.transform = 'rotateY(180deg)';
+            } else {
+                inner.style.transform = 'rotateY(0deg)';
+            }
+        }
+
+        function nextFlashcard() {
+            fcIndex = (fcIndex + 1) % activeFlashcards.length;
+            renderFlashcard();
+        }
+
+        function prevFlashcard() {
+            fcIndex = (fcIndex - 1 + activeFlashcards.length) % activeFlashcards.length;
+            renderFlashcard();
+        }
+
+        function shuffleFlashcards() {
+            activeFlashcards.sort(() => Math.random() - 0.5);
+            fcIndex = 0;
+            renderFlashcard();
+        }
+
+        // --- QUIZ LOGIC ---
+        function initQuiz() {
+            quizIndex = 0;
+            quizScore = 0;
+            userAnswers = {};
+            quizCompleted = false;
+            document.getElementById('quizTotalNum').innerText = quizData.length;
+            document.getElementById('quizResultView').classList.add('hidden');
+            document.getElementById('quizView').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const q = quizData[quizIndex];
+            document.getElementById('quizCurrentNum').innerText = quizIndex + 1;
+            document.getElementById('quizCategoryBadge').innerText = q.category;
+            document.getElementById('quizQuestionText').innerText = q.question;
+            document.getElementById('quizLiveScore').innerText = quizScore + ' Poin';
+
+            const container = document.getElementById('quizOptionsContainer');
+            container.innerHTML = '';
+
+            const expBox = document.getElementById('quizExplanationBox');
+            expBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            const prevBtn = document.getElementById('quizPrevBtn');
+
+            // Prev button state
+            if (quizIndex === 0) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = true;
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                prevBtn.disabled = false;
+            }
+
+            const answered = userAnswers[quizIndex] !== undefined;
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border border-slate-700 bg-darkblue-900/60 hover:bg-darkblue-700 hover:border-gold/50 transition-all text-sm sm:text-base flex items-center justify-between group";
+                
+                let indicator = `<span class="w-6 h-6 rounded-full border border-slate-600 flex items-center justify-center text-xs text-slate-400 group-hover:border-gold group-hover:text-gold">${String.fromCharCode(65 + idx)}</span>`;
+                
+                if (answered) {
+                    btn.disabled = true;
+                    if (idx === q.correct) {
+                        btn.className = "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-950/40 text-emerald-200 text-sm sm:text-base flex items-center justify-between";
+                        indicator = `<span class="w-6 h-6 rounded-full bg-emerald-500 text-darkblue-900 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-check"></i></span>`;
+                    } else if (userAnswers[quizIndex] === idx) {
+                        btn.className = "w-full text-left p-4 rounded-xl border border-rose-500 bg-rose-950/40 text-rose-200 text-sm sm:text-base flex items-center justify-between";
+                        indicator = `<span class="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-xmark"></i></span>`;
+                    } else {
+                        btn.className = "w-full text-left p-4 rounded-xl border border-slate-800 bg-darkblue-900/30 text-slate-500 text-sm sm:text-base flex items-center justify-between opacity-60";
+                    }
+                } else {
+                    btn.onclick = () => selectQuizOption(idx);
+                }
+
+                btn.innerHTML = `<span>${opt}</span> ${indicator}`;
+                container.appendChild(btn);
+            });
+
+            if (answered) {
+                showExplanation(q, userAnswers[quizIndex] === q.correct);
+                nextBtn.classList.remove('hidden');
+                if (quizIndex === quizData.length - 1) {
+                    nextBtn.innerHTML = `<span>Lihat Hasil Ujian</span> <i class="fa-solid fa-flag-checkered"></i>`;
+                } else {
+                    nextBtn.innerHTML = `<span>Lanjut Soal</span> <i class="fa-solid fa-arrow-right"></i>`;
+                }
+            } else {
+                nextBtn.classList.add('hidden');
+            }
+        }
+
+        function selectQuizOption(selectedIndex) {
+            const q = quizData[quizIndex];
+            userAnswers[quizIndex] = selectedIndex;
+
+            const isCorrect = selectedIndex === q.correct;
+            const pointsPerQuestion = 100 / quizData.length;
+
+            if (isCorrect) {
+                quizScore += Math.round(pointsPerQuestion);
+            }
+
+            renderQuizQuestion();
+        }
+
+        function showExplanation(q, isCorrect) {
+            const expBox = document.getElementById('quizExplanationBox');
+            const expTitle = document.getElementById('quizExpTitle');
+            const expText = document.getElementById('quizExpText');
+
+            expBox.classList.remove('hidden');
+            if (isCorrect) {
+                expBox.className = "mt-4 p-4 rounded-xl border border-emerald-500/40 bg-emerald-950/30 text-sm space-y-1";
+                expTitle.className = "font-bold flex items-center space-x-2 text-emerald-400";
+                expTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>Jawaban Benar! Analisis & Arahan:</span>`;
+            } else {
+                expBox.className = "mt-4 p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-sm space-y-1";
+                expTitle.className = "font-bold flex items-center space-x-2 text-rose-400";
+                expTitle.innerHTML = `<i class="fa-solid fa-circle-xmark"></i><span>Kurang Tepat. Analisis & Arahan:</span>`;
+            }
+            expText.innerText = q.explanation;
+        }
+
+        function nextQuizQuestion() {
+            if (quizIndex < quizData.length - 1) {
+                quizIndex++;
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function prevQuizQuestion() {
+            if (quizIndex > 0) {
+                quizIndex--;
+                renderQuizQuestion();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quizView').classList.add('hidden');
+            const rView = document.getElementById('quizResultView');
+            rView.classList.remove('hidden');
+
+            // Normalize score rounding
+            if (quizScore > 95) quizScore = 100;
+
+            document.getElementById('finalScoreText').innerText = quizScore + ' / 100';
+            
+            const statusText = document.getElementById('finalStatusText');
+            const msgText = document.getElementById('resultMessage');
+
+            if (quizScore >= 80) {
+                statusText.innerText = "Sangat Kompeten & Disiplin";
+                statusText.className = "text-base font-bold text-emerald-400 mt-1";
+                msgText.innerText = "Luar biasa! Anda memiliki pemahaman mendalam mengenai prinsip manajemen operasional, komando satu pintu, serta komitmen integritas team. Terus pertahankan disiplin ini!";
+            } else if (quizScore >= 60) {
+                statusText.innerText = "Cukup Kompeten";
+                statusText.className = "text-base font-bold text-gold mt-1";
+                msgText.innerText = "Pemahaman Anda sudah baik, namun disarankan untuk meninjau kembali materi flashcards terkait kedisiplinan dan doktrin organisasi agar semakin selaras.";
+            } else {
+                statusText.innerText = "Perlu Peninjauan Ulang";
+                statusText.className = "text-base font-bold text-rose-400 mt-1";
+                msgText.innerText = "Mari luangkan waktu untuk mempelajari kembali modul flashcards. Pemahaman menyeluruh terhadap arahan dan standar operasional sangat krusial bagi kesuksesan bersama.";
+            }
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+    </script>
+</body>
+</html>
